@@ -1,0 +1,12 @@
+npm install express@5 bcrypt dotenv nanoid pg instances-container
+npm install vitest eslint node-pg-migrate nodemon supertest --save-dev
+npx eslint --init
+
+psql -U postgres
+CREATE DATABASE forumapi; CREATE DATABASE forumapi_test;
+npm run migrate create "create table users"
+npm run migrate create "create table authentications"
+npm run migrate create "create table threads"
+npm run migrate up
+
+Kalau error crlf, npx eslint . --fix
