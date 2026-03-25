@@ -1,20 +1,21 @@
 /* eslint-disable camelcase */
 export const up = (pgm) => {
-  pgm.createTable('threads', {
+  pgm.createTable('comments', {
     id: {
       type: 'VARCHAR(50)',
       primaryKey: true
+    },
+    thread_id: {
+      type: 'VARCHAR(50)',
+      notNull: true,
+      references: 'threads',
     },
     user_id: {
       type: 'VARCHAR(50)',
       notNull: true,
       references: 'users',
     },
-    title: {
-      type: 'TEXT',
-      notNull: true,
-    },
-    body: {
+    content: {
       type: 'TEXT',
       notNull: true,
     },
@@ -33,5 +34,5 @@ export const up = (pgm) => {
 };
 
 export const down = (pgm) => {
-  pgm.dropTable('threads');
+  pgm.dropTable('comments');
 };

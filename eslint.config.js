@@ -11,5 +11,18 @@ export default defineConfig([
     },
   },
   daStyle,
-  { files: ['**/*.{js,mjs,cjs}'], plugins: { js }, extends: ['js/recommended'], languageOptions: { globals: { ...vitest.environments.env.globals, ...globals.node } } },
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    plugins: { js },
+    extends: ['js/recommended'],
+    languageOptions: {
+      globals: {
+        ...vitest.environments.env.globals,
+        ...globals.node
+      }
+    },
+    rules: {
+      'linebreak-style': 'off'
+    }
+  },
 ]);
