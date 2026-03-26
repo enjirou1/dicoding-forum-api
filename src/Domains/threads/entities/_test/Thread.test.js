@@ -7,7 +7,9 @@ describe('a Thread entities', () => {
       id: 'Thread ID',
       title: 'Title',
       body: 'Body',
-      userId: '123'
+      // userId: '123',
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
 
     // Action and Assert

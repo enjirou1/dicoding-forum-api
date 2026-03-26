@@ -10,3 +10,4 @@ npm run migrate create "create table threads"
 npm run migrate up
 
 Kalau error crlf, npx eslint . --fix
+Kalau mau update db, npx migrate reset lalu npm run migrate up

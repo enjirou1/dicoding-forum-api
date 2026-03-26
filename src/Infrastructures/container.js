@@ -28,6 +28,7 @@ import RefreshAuthenticationUseCase from '../Applications/use_case/RefreshAuthen
 import ThreadUseCase from '../Applications/use_case/ThreadUseCase.js';
 import CommentUseCase from '../Applications/use_case/CommentUseCase.js';
 import ReplyUseCase from '../Applications/use_case/ReplyUseCase.js';
+import AuthenticationMiddleware from '../Commons/middlewares/AuthenticationMiddleware.js';
 
 // creating container
 const container = createContainer();
@@ -181,10 +182,6 @@ container.register([
           name: 'threadRepository',
           internal: ThreadRepository.name,
         },
-        {
-          name: 'authenticationTokenManager',
-          internal: AuthenticationTokenManager.name,
-        },
       ],
     },
   },
@@ -197,10 +194,6 @@ container.register([
         {
           name: 'threadRepository',
           internal: ThreadRepository.name,
-        },
-        {
-          name: 'authenticationTokenManager',
-          internal: AuthenticationTokenManager.name,
         },
       ],
     },
@@ -215,6 +208,19 @@ container.register([
           name: 'threadRepository',
           internal: ThreadRepository.name,
         },
+      ],
+    },
+  },
+]);
+
+// registering middleware
+container.register([
+  {
+    key: AuthenticationMiddleware.name,
+    Class: AuthenticationMiddleware,
+    parameter: {
+      injectType: 'destructuring',
+      dependencies: [
         {
           name: 'authenticationTokenManager',
           internal: AuthenticationTokenManager.name,

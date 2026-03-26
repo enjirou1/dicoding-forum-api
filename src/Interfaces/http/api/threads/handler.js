@@ -17,7 +17,7 @@ class ThreadsHandler {
   async postThreadHandler(req, res, next) {
     try {
       const threadUseCase = this._container.getInstance(ThreadUseCase.name);
-      const addedThread = await threadUseCase.create(req.body, req.headers);
+      const addedThread = await threadUseCase.create({ ...req.body, userId: res.locals.user.id });
 
       res.status(201).json({
         status: 'success',
@@ -83,7 +83,7 @@ class ThreadsHandler {
   async postCommentHandler(req, res, next) {
     try {
       const commentUseCase = this._container.getInstance(CommentUseCase.name);
-      const addedComment = await commentUseCase.create({ ...req.body, threadId: req.params.threadId }, req.headers);
+      const addedComment = await commentUseCase.create({ ...req.body, threadId: req.params.threadId, userId: res.locals.user.id });
 
       res.status(201).json({
         status: 'success',
@@ -103,7 +103,7 @@ class ThreadsHandler {
   async deleteCommentHandler(req, res, next) {
     try {
       const commentUseCase = this._container.getInstance(CommentUseCase.name);
-      await commentUseCase.delete({ id: req.params.commentId }, req.headers);
+      await commentUseCase.delete({ id: req.params.commentId, userId: res.locals.user.id });
 
       res.status(200).json({
         status: 'success',
@@ -116,7 +116,7 @@ class ThreadsHandler {
   async postReplyHandler(req, res, next) {
     try {
       const replyUseCase = this._container.getInstance(ReplyUseCase.name);
-      const addedReply = await replyUseCase.create({ ...req.body, threadId: req.params.threadId, commentId: req.params.commentId }, req.headers);
+      const addedReply = await replyUseCase.create({ ...req.body, threadId: req.params.threadId, commentId: req.params.commentId, userId: res.locals.user.id });
 
       res.status(201).json({
         status: 'success',
@@ -136,7 +136,7 @@ class ThreadsHandler {
   async deleteReplyHandler(req, res, next) {
     try {
       const replyUseCase = this._container.getInstance(ReplyUseCase.name);
-      await replyUseCase.delete({ id: req.params.replyId }, req.headers);
+      await replyUseCase.delete({ id: req.params.replyId, userId: res.locals.user.id });
 
       res.status(200).json({
         status: 'success',
