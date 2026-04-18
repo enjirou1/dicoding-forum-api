@@ -44,8 +44,9 @@ jobs:
       env:
         CI: true
         HOST: 0.0.0.0
-        PORT: 3000
-        PGHOST: localhost
+        PORT: 3001
+        NODE_ENV: production
+        PGHOST: auth-api.chii6iaiirju.ap-southeast-1.rds.amazonaws.com
         PGPORT: 5432
         PGUSER: postgres
         PGPASSWORD: supersecret
