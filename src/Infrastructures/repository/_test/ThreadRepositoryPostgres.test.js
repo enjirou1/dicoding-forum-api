@@ -20,32 +20,34 @@ describe('ThreadRepositoryPostgres', () => {
     it('should persist new thread and return thread correctly', async () => {
       // Arrange
       const userId = `user-${Date.now()}`;
-      await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
       const createThread = new CreateThread({ title: 'Title', body: 'This is body', userId });
-      const fakeIdGenerator = () => '123';
+      const fakeIdGenerator = () => 'abc';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
       await threadRepository.addThread(createThread);
 
       // Assert
-      const threads = await ThreadsTableTestHelper.findThreadsById('thread-123');
+      const threads = await ThreadsTableTestHelper.findThreadsById('thread-abc');
       expect(threads).toHaveLength(1);
     });
 
     it('should return thread correctly', async () => {
       // Arrange
       const userId = `user-${Date.now()}`;
-      await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
       const createThread = new CreateThread({ title: 'Title', body: 'This is body', userId });
-      const fakeIdGenerator = () => '123';
+      const fakeIdGenerator = () => 'def';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
       const thread = await threadRepository.addThread(createThread);
 
       // Assert
-      expect(thread.id).toBe(`thread-${fakeIdGenerator()}`);
+      expect(thread.id).toBe('thread-def');
       expect(thread.title).toBe(createThread.title);
       expect(thread.body).toBe(createThread.body);
       expect(thread.userId).toBe(createThread.userId);
@@ -54,13 +56,15 @@ describe('ThreadRepositoryPostgres', () => {
     });
   });
 
-  describe('addComment function', () => {
+  describe.sequential('addComment function', () => {
     it('should persist new comment and return comment correctly', async () => {
       // Arrange
       const userId = `user-${Date.now()}`;
-      await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
-      const createComment = new CreateComment({ content: 'This is content', threadId: 'thread-123', userId });
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      const threadId = `thread-${Date.now()}`;
+      await ThreadsTableTestHelper.addThread({ id: threadId, userId });
+      const createComment = new CreateComment({ content: 'This is content', threadId, userId });
       const fakeIdGenerator = () => '123';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
@@ -75,7 +79,8 @@ describe('ThreadRepositoryPostgres', () => {
     it('should return comment correctly', async () => {
       // Arrange
       const userId = `user-${Date.now()}`;
-      await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
       const createComment = new CreateComment({ content: 'This is content', threadId: 'thread-123', userId });
       const fakeIdGenerator = () => '123';
@@ -98,7 +103,8 @@ describe('ThreadRepositoryPostgres', () => {
     it('should delete comment correctly', async () => {
       // Arrange
       const userId = `user-${Date.now()}`;
-      await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
       await ThreadsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123', userId });
       const fakeIdGenerator = () => '123';
@@ -117,7 +123,8 @@ describe('ThreadRepositoryPostgres', () => {
     it('should persist new reply and return reply correctly', async () => {
       // Arrange
       const userId = `user-${Date.now()}`;
-      await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
       await ThreadsTableTestHelper.addComment({ id: 'comment-123', userId });
       const createReply = new CreateReply({ content: 'This is content', commentId: 'comment-123', userId });
@@ -135,7 +142,8 @@ describe('ThreadRepositoryPostgres', () => {
     it('should return reply correctly', async () => {
       // Arrange
       const userId = `user-${Date.now()}`;
-      await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
       await ThreadsTableTestHelper.addComment({ id: 'comment-123', userId });
       const createReply = new CreateReply({ content: 'This is content', commentId: 'comment-123', userId });
@@ -159,7 +167,8 @@ describe('ThreadRepositoryPostgres', () => {
     it('should delete reply correctly', async () => {
       // Arrange
       const userId = `user-${Date.now()}`;
-      await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
       await ThreadsTableTestHelper.addComment({ id: 'comment-123', userId });
       await ThreadsTableTestHelper.addReply({ id: 'reply-123', userId });
