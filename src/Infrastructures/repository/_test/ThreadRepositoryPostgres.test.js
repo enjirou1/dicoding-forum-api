@@ -5,6 +5,7 @@ import pool from '../../database/postgres/pool.js';
 import ThreadRepositoryPostgres from '../ThreadRepositoryPostgres.js';
 import CreateComment from '../../../Domains/threads/entities/CreateComment.js';
 import CreateReply from '../../../Domains/threads/entities/CreateReply.js';
+import { nanoid } from 'nanoid';
 
 describe('ThreadRepositoryPostgres', () => {
   afterEach(async () => {
@@ -16,11 +17,11 @@ describe('ThreadRepositoryPostgres', () => {
     await pool.end();
   });
 
-  describe.sequential('addThread function', () => {
+  describe('addThread function', () => {
     it('should persist new thread and return thread correctly', async () => {
       // Arrange
-      const userId = `user-${Date.now()}`;
-      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${nanoid()}`;
       await UsersTableTestHelper.addUser({ id: userId, username });
       const createThread = new CreateThread({ title: 'Title', body: 'This is body', userId });
       const fakeIdGenerator = () => 'abc';
@@ -36,8 +37,8 @@ describe('ThreadRepositoryPostgres', () => {
 
     it('should return thread correctly', async () => {
       // Arrange
-      const userId = `user-${Date.now()}`;
-      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${nanoid()}`;
       await UsersTableTestHelper.addUser({ id: userId, username });
       const createThread = new CreateThread({ title: 'Title', body: 'This is body', userId });
       const fakeIdGenerator = () => 'def';
@@ -56,7 +57,7 @@ describe('ThreadRepositoryPostgres', () => {
     });
   });
 
-  describe.sequential('addComment function', () => {
+  describe('addComment function', () => {
     it('should persist new comment and return comment correctly', async () => {
       // Arrange
       const userId = `user-${Date.now()}`;
