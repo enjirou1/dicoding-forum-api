@@ -39,7 +39,6 @@ jobs:
     - name: npm install migrate and test
       run: |
         npm install
-        sleep 5
         npm run migrate up
         npm run test
       env:

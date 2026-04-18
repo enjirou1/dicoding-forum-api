@@ -119,7 +119,8 @@ describe('HTTP server', () => {
 
     it('should response 400 when username unavailable', async () => {
       // Arrange
-      await UsersTableTestHelper.addUser({ username: 'dicoding' });
+      const userId = `user-${Date.now()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
       const requestPayload = {
         username: 'dicoding',
         fullname: 'Dicoding Indonesia',
