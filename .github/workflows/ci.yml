@@ -39,13 +39,14 @@ jobs:
     - name: npm install migrate and test
       run: |
         npm install
+        sleep 5
         npm run migrate up
         npm run test
       env:
         CI: true
         HOST: 0.0.0.0
         PORT: 3001
-        PGHOST: auth-api.chii6iaiirju.ap-southeast-1.rds.amazonaws.com
+        PGHOST: localhost
         PGPORT: 5432
         PGUSER: postgres
         PGPASSWORD: supersecret
