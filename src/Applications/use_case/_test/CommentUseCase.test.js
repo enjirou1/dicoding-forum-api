@@ -108,10 +108,20 @@ describe('CommentUseCase', () => {
       likedBy: ['user-123']
     });
 
+    const mockThread = new Thread({
+      id: 'thread-123',
+      title: 'Title',
+      body: 'This is body',
+      userId: 'user-123',
+      createdAt: new Date('2025-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2025-01-01T00:00:00.000Z')
+    });
+
     const mockThreadRepository = new ThreadRepository();
 
     mockThreadRepository.likeComment = vi.fn().mockImplementation(() => Promise.resolve(useCasePayload));
     mockThreadRepository.getCommentById = vi.fn().mockImplementation(() => Promise.resolve(mockComment));
+    mockThreadRepository.getThreadById = vi.fn().mockImplementation(() => Promise.resolve(mockThread));
 
     const commentUseCase = new CommentUseCase({
       threadRepository: mockThreadRepository,
