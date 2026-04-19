@@ -4,6 +4,7 @@ import RegisterUser from '../../../Domains/users/entities/RegisterUser.js';
 import RegisteredUser from '../../../Domains/users/entities/RegisteredUser.js';
 import pool from '../../database/postgres/pool.js';
 import UserRepositoryPostgres from '../UserRepositoryPostgres.js';
+import { nanoid } from 'nanoid';
 
 describe('UserRepositoryPostgres', () => {
   afterEach(async () => {
@@ -17,8 +18,8 @@ describe('UserRepositoryPostgres', () => {
   describe.sequential('verifyAvailableUsername function', () => {
     it('should throw InvariantError when username not available', async () => {
       // Arrange
-      const userId = `user-${Date.now()}`;
-      const username = `dicodingr-${Date.now()}-${Math.random()}`;
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${nanoid()}-${Math.random()}`;
       await UsersTableTestHelper.addUser({ id: userId, username }); // memasukan user baru dengan username dicoding
       const userRepositoryPostgres = new UserRepositoryPostgres(pool, {});
 
@@ -80,7 +81,7 @@ describe('UserRepositoryPostgres', () => {
     it('should throw InvariantError when user not found', async () => {
       // Arrange
       const userRepositoryPostgres = new UserRepositoryPostgres(pool, {});
-      const userId = `user-${Date.now()}`;
+      const userId = `user-${nanoid()}`;
       await UsersTableTestHelper.addUser({
         id: userId,
         username: 'dicoding',
@@ -96,7 +97,7 @@ describe('UserRepositoryPostgres', () => {
     it('should return username password when user is found', async () => {
       // Arrange
       const userRepositoryPostgres = new UserRepositoryPostgres(pool, {});
-      const userId = `user-${Date.now()}`;
+      const userId = `user-${nanoid()}`;
       await UsersTableTestHelper.addUser({
         id: userId,
         username: 'dicoding2',
@@ -122,7 +123,7 @@ describe('UserRepositoryPostgres', () => {
 
     it('should return user id correctly', async () => {
       // Arrange
-      const userId = `user-${Date.now()}`;
+      const userId = `user-${nanoid()}`;
       await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
       const userRepositoryPostgres = new UserRepositoryPostgres(pool, {});
 

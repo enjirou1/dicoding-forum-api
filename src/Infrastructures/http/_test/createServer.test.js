@@ -5,6 +5,7 @@ import AuthenticationsTableTestHelper from '../../../../tests/AuthenticationsTab
 import container from '../../container.js';
 import createServer from '../createServer.js';
 import AuthenticationTokenManager from '../../../Applications/security/AuthenticationTokenManager.js';
+import { nanoid } from 'nanoid';
 
 describe('HTTP server', () => {
   afterAll(async () => {
@@ -119,7 +120,7 @@ describe('HTTP server', () => {
 
     it('should response 400 when username unavailable', async () => {
       // Arrange
-      const userId = `user-${Date.now()}`;
+      const userId = `user-${nanoid()}`;
       await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
       const requestPayload = {
         username: 'dicoding',

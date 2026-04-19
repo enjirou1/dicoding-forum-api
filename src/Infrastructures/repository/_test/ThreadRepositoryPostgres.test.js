@@ -8,9 +8,17 @@ import CreateReply from '../../../Domains/threads/entities/CreateReply.js';
 import { nanoid } from 'nanoid';
 
 describe('ThreadRepositoryPostgres', () => {
+  // afterEach(async () => {
+  //   await ThreadsTableTestHelper.cleanTable();
+  //   await UsersTableTestHelper.cleanTable();
+  // });
+
+  beforeEach(async () => {
+    await pool.query('BEGIN');
+  });
+
   afterEach(async () => {
-    await ThreadsTableTestHelper.cleanTable();
-    await UsersTableTestHelper.cleanTable();
+    await pool.query('ROLLBACK');
   });
 
   afterAll(async () => {
@@ -28,8 +36,6 @@ describe('ThreadRepositoryPostgres', () => {
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
-      const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-      await delay(100);
       await threadRepository.addThread(createThread);
 
       // Assert
@@ -47,8 +53,6 @@ describe('ThreadRepositoryPostgres', () => {
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
-      const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-      await delay(100);
       const thread = await threadRepository.addThread(createThread);
 
       // Assert
@@ -64,7 +68,7 @@ describe('ThreadRepositoryPostgres', () => {
   describe('addComment function', () => {
     it('should persist new comment and return comment correctly', async () => {
       // Arrange
-      const userId = `user-${Date.now()}`;
+      const userId = `user-${nanoid()}`;
       const username = `dicoding-${Date.now()}-${Math.random()}`;
       await UsersTableTestHelper.addUser({ id: userId, username });
       const threadId = `thread-${Date.now()}`;
@@ -83,12 +87,12 @@ describe('ThreadRepositoryPostgres', () => {
 
     it('should return comment correctly', async () => {
       // Arrange
-      const userId = `user-${Date.now()}`;
+      const userId = `user-${nanoid()}`;
       const username = `dicoding-${Date.now()}-${Math.random()}`;
       await UsersTableTestHelper.addUser({ id: userId, username });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
-      const createComment = new CreateComment({ content: 'This is content', threadId: 'thread-123', userId });
-      const fakeIdGenerator = () => '123';
+      await ThreadsTableTestHelper.addThread({ id: 'thread-456', userId });
+      const createComment = new CreateComment({ content: 'This is content', threadId: 'thread-456', userId });
+      const fakeIdGenerator = () => '456';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
@@ -107,7 +111,7 @@ describe('ThreadRepositoryPostgres', () => {
   describe('deleteComment function', () => {
     it('should delete comment correctly', async () => {
       // Arrange
-      const userId = `user-${Date.now()}`;
+      const userId = `user-${nanoid()}`;
       const username = `dicoding-${Date.now()}-${Math.random()}`;
       await UsersTableTestHelper.addUser({ id: userId, username });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
@@ -127,7 +131,7 @@ describe('ThreadRepositoryPostgres', () => {
   describe('addReply function', () => {
     it('should persist new reply and return reply correctly', async () => {
       // Arrange
-      const userId = `user-${Date.now()}`;
+      const userId = `user-${nanoid()}`;
       const username = `dicoding-${Date.now()}-${Math.random()}`;
       await UsersTableTestHelper.addUser({ id: userId, username });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
@@ -146,7 +150,7 @@ describe('ThreadRepositoryPostgres', () => {
 
     it('should return reply correctly', async () => {
       // Arrange
-      const userId = `user-${Date.now()}`;
+      const userId = `user-${nanoid()}`;
       const username = `dicoding-${Date.now()}-${Math.random()}`;
       await UsersTableTestHelper.addUser({ id: userId, username });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
@@ -171,7 +175,7 @@ describe('ThreadRepositoryPostgres', () => {
   describe('deleteReply function', () => {
     it('should delete reply correctly', async () => {
       // Arrange
-      const userId = `user-${Date.now()}`;
+      const userId = `user-${nanoid()}`;
       const username = `dicoding-${Date.now()}-${Math.random()}`;
       await UsersTableTestHelper.addUser({ id: userId, username });
       await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
