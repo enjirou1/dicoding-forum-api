@@ -11,3 +11,115 @@ npm run migrate up
 
 Kalau error crlf, npx eslint . --fix
 Kalau mau update db, npx migrate reset lalu npm run migrate up
+
+npm install instances-container
+
+Buat Security Group
+- Add Inbound Rules: TCP 3000 Anywhere Application Port & SSH 22 Anywhere SSH Port
+- Add Inbound Rules: TCP 5432 Anywhere Database Port
+
+Buat EC2
+- Ubuntu
+- t3.micro
+- Buat key pair RSA .pem
+- Select existing security Group
+- Launch Instance
+
+Buat Cluster RDS
+- Engine options, pilih engine PostgreSQL, pilih versi dibawah 15
+- Choose a database creation method Full configuration
+- Isi DB instance identifier, Master username, Master password
+- Uncheck Enable storage autoscaling
+- Public access No
+- Pilih security group database
+- Uncheck Turn on Performance Insight
+- Uncheck Enable automated backups
+- Enable auto minor version upgrade
+
+Akses Database
+- Buka terminal di local
+- psql --host dicoding-forum-api.chii6iaiirju.ap-southeast-1.rds.amazonaws.com --username postgres
+- password supersecret
+- CREATE DATABASE forum_api; CREATE DATABASE forum_api_test;
+
+Akses EC2
+- Buka Terminal/PowerShell/CMD pada directory di mana Anda menyimpan key pairs (key.pem) untuk akses EC2 instance
+- ssh -i "<key>.pem" <user>@<alamat instance EC2>
+- Kalau error UNPROTECTED PRIVATE KEY FILE
+  icacls "forum-api-webserver.pem" /remove "Authenticated Users"
+  icacls "forum-api-webserver.pem" /remove "Users"
+  icacls "forum-api-webserver.pem" /remove "Everyone"
+  icacls "forum-api-webserver.pem" /inheritance:r
+  icacls "forum-api-webserver.pem" /grant:r %username%:R
+  icacls "forum-api-webserver.pem"
+- Kemudian akses ec2 lagi
+- Install Node js
+  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+  sudo apt-get install -y nodejs
+  sudo npm install pm2 -g
+
+Setup Project
+- git clone https://github.com/enjirou1/dicoding-forum-api.git
+- cd dicoding-forum-api
+- npm install
+- touch .env
+- vim .env, tekan tombol insert untuk edit lalu esc untuk keluar mode kemudian :wq untuk keluar
+- mkdir -p config/database
+- touch config/database/test.json
+- vim config/database/test.json
+- npm run migrate up
+- npm run migrate:test up
+- npm run test
+- pm2 start npm --name "dicoding-forum-api" -- run "start"
+
+Pasang CI/CD
+- Buat file ci yaml
+- Buat branch baru
+- Jalankan pull request
+- Buat file cd yaml
+- Coba merge request master
+
+Setup Nginx
+- sudo apt update
+- sudo apt-get install nginx -y
+- sudo systemctl status nginx
+- Tambahkan inbound rules untuk server nginx
+  HTTP Anywhere dan HTTPS Anywhere
+
+Config Nginx sebagai Reverse Proxy Server
+- sudo vim /etc/nginx/sites-available/default
+  location / {
+    proxy_pass http://localhost:3000; # your app's port
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+  }
+- Simpan lalu sudo systemctl restart nginx
+- Akses dengan Public IPv4 address
+
+Terapkan Limit Access
+- sudo vim /etc/nginx/sites-available/default
+- Pada baris awal berkas tambahkan limit_req_zone $binary_remote_addr zone=one:10m rate=30r/m;
+- Tambahkan dalam blok location / limit_req zone=one;
+- limit_req zone=one;
+- Jika diakses lebih dari 1 request / 2 detik maka error 503
+- Hapus inbound traffic yang langsung mengarah ke aplikasi (Custom TCP) supaya jalur untuk mengakses aplikasi hanya tersedia melalui reverse proxy server
+- sudo nginx -t && sudo nginx -s reload (ketika ada perubahan config)
+
+Domain
+- Buat domain
+- Tambahkan DNS record tipe A untuk @ dan www dengan nilai target public IP EC2 instance
+- sudo vim /etc/nginx/sites-available/default
+- Tulis hostname di server_name di dalam blok server
+- sudo systemctl restart nginx
+
+HTTPS
+- sudo apt-get update
+- sudo apt-get install python3-certbot-nginx -y
+- sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+  Please choose whether or not to redirect HTTP traffic to HTTPS … : 2 (Redirect)
+
+Swagger
+- npm install swagger-jsdoc swagger-ui-express --save
