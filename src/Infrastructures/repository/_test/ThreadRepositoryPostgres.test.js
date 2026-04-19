@@ -28,6 +28,8 @@ describe('ThreadRepositoryPostgres', () => {
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
+      const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      await delay(100);
       await threadRepository.addThread(createThread);
 
       // Assert
@@ -45,6 +47,8 @@ describe('ThreadRepositoryPostgres', () => {
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
+      const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      await delay(100);
       const thread = await threadRepository.addThread(createThread);
 
       // Assert
