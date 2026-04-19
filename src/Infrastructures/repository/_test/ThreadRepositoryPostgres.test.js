@@ -5,11 +5,20 @@ import pool from '../../database/postgres/pool.js';
 import ThreadRepositoryPostgres from '../ThreadRepositoryPostgres.js';
 import CreateComment from '../../../Domains/threads/entities/CreateComment.js';
 import CreateReply from '../../../Domains/threads/entities/CreateReply.js';
+import { nanoid } from 'nanoid';
 
 describe('ThreadRepositoryPostgres', () => {
+  // afterEach(async () => {
+  //   await ThreadsTableTestHelper.cleanTable();
+  //   await UsersTableTestHelper.cleanTable();
+  // });
+
+  beforeEach(async () => {
+    await pool.query('BEGIN');
+  });
+
   afterEach(async () => {
-    await ThreadsTableTestHelper.cleanTable();
-    await UsersTableTestHelper.cleanTable();
+    await pool.query('ROLLBACK');
   });
 
   afterAll(async () => {
@@ -19,31 +28,35 @@ describe('ThreadRepositoryPostgres', () => {
   describe('addThread function', () => {
     it('should persist new thread and return thread correctly', async () => {
       // Arrange
-      await UsersTableTestHelper.addUser({ id: 'user-123', username: 'dicoding' });
-      const createThread = new CreateThread({ title: 'Title', body: 'This is body', userId: 'user-123' });
-      const fakeIdGenerator = () => '123';
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${nanoid()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      const createThread = new CreateThread({ title: 'Title', body: 'This is body', userId });
+      const fakeIdGenerator = () => 'abc';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
       await threadRepository.addThread(createThread);
 
       // Assert
-      const threads = await ThreadsTableTestHelper.findThreadsById('thread-123');
+      const threads = await ThreadsTableTestHelper.findThreadsById('thread-abc');
       expect(threads).toHaveLength(1);
     });
 
     it('should return thread correctly', async () => {
       // Arrange
-      await UsersTableTestHelper.addUser({ username: 'dicoding' });
-      const createThread = new CreateThread({ title: 'Title', body: 'This is body', userId: 'user-123' });
-      const fakeIdGenerator = () => '123';
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${nanoid()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      const createThread = new CreateThread({ title: 'Title', body: 'This is body', userId });
+      const fakeIdGenerator = () => 'def';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
       const thread = await threadRepository.addThread(createThread);
 
       // Assert
-      expect(thread.id).toBe(`thread-${fakeIdGenerator()}`);
+      expect(thread.id).toBe('thread-def');
       expect(thread.title).toBe(createThread.title);
       expect(thread.body).toBe(createThread.body);
       expect(thread.userId).toBe(createThread.userId);
@@ -55,9 +68,12 @@ describe('ThreadRepositoryPostgres', () => {
   describe('addComment function', () => {
     it('should persist new comment and return comment correctly', async () => {
       // Arrange
-      await UsersTableTestHelper.addUser({ username: 'dicoding' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
-      const createComment = new CreateComment({ content: 'This is content', threadId: 'thread-123', userId: 'user-123' });
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      const threadId = `thread-${Date.now()}`;
+      await ThreadsTableTestHelper.addThread({ id: threadId, userId });
+      const createComment = new CreateComment({ content: 'This is content', threadId, userId });
       const fakeIdGenerator = () => '123';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
@@ -71,10 +87,12 @@ describe('ThreadRepositoryPostgres', () => {
 
     it('should return comment correctly', async () => {
       // Arrange
-      await UsersTableTestHelper.addUser({ username: 'dicoding' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
-      const createComment = new CreateComment({ content: 'This is content', threadId: 'thread-123', userId: 'user-123' });
-      const fakeIdGenerator = () => '123';
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-456', userId });
+      const createComment = new CreateComment({ content: 'This is content', threadId: 'thread-456', userId });
+      const fakeIdGenerator = () => '456';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
@@ -93,9 +111,11 @@ describe('ThreadRepositoryPostgres', () => {
   describe('deleteComment function', () => {
     it('should delete comment correctly', async () => {
       // Arrange
-      await UsersTableTestHelper.addUser({ username: 'dicoding' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
-      await ThreadsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123' });
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
+      await ThreadsTableTestHelper.addComment({ id: 'comment-123', threadId: 'thread-123', userId });
       const fakeIdGenerator = () => '123';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
@@ -111,10 +131,12 @@ describe('ThreadRepositoryPostgres', () => {
   describe('addReply function', () => {
     it('should persist new reply and return reply correctly', async () => {
       // Arrange
-      await UsersTableTestHelper.addUser({ username: 'dicoding' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
-      await ThreadsTableTestHelper.addComment({ id: 'comment-123' });
-      const createReply = new CreateReply({ content: 'This is content', commentId: 'comment-123', userId: 'user-123' });
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
+      await ThreadsTableTestHelper.addComment({ id: 'comment-123', userId });
+      const createReply = new CreateReply({ content: 'This is content', commentId: 'comment-123', userId });
       const fakeIdGenerator = () => '123';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
@@ -128,10 +150,12 @@ describe('ThreadRepositoryPostgres', () => {
 
     it('should return reply correctly', async () => {
       // Arrange
-      await UsersTableTestHelper.addUser({ username: 'dicoding' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
-      await ThreadsTableTestHelper.addComment({ id: 'comment-123' });
-      const createReply = new CreateReply({ content: 'This is content', commentId: 'comment-123', userId: 'user-123' });
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
+      await ThreadsTableTestHelper.addComment({ id: 'comment-123', userId });
+      const createReply = new CreateReply({ content: 'This is content', commentId: 'comment-123', userId });
       const fakeIdGenerator = () => '123';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
@@ -151,10 +175,12 @@ describe('ThreadRepositoryPostgres', () => {
   describe('deleteReply function', () => {
     it('should delete reply correctly', async () => {
       // Arrange
-      await UsersTableTestHelper.addUser({ username: 'dicoding' });
-      await ThreadsTableTestHelper.addThread({ id: 'thread-123' });
-      await ThreadsTableTestHelper.addComment({ id: 'comment-123' });
-      await ThreadsTableTestHelper.addReply({ id: 'reply-123' });
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
+      await ThreadsTableTestHelper.addComment({ id: 'comment-123', userId });
+      await ThreadsTableTestHelper.addReply({ id: 'reply-123', userId });
       const fakeIdGenerator = () => '123';
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
@@ -164,6 +190,45 @@ describe('ThreadRepositoryPostgres', () => {
       // Assert
       const replies = await ThreadsTableTestHelper.findRepliesById('reply-123');
       expect(replies).toHaveLength(0);
+    });
+  });
+
+  describe('likeComment function', () => {
+    it('should like comment correctly', async () => {
+      // Arrange
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
+      await ThreadsTableTestHelper.addComment({ id: 'comment-123', userId });
+      const fakeIdGenerator = () => '123';
+      const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      await threadRepository.likeComment({ commentId: 'comment-123', userId });
+
+      // Assert
+      const comments = await ThreadsTableTestHelper.findCommentsById('comment-123');
+      expect(comments[0].liked_by).toContain(userId);
+    });
+
+    it('should unlike comment correctly', async () => {
+      // Arrange
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
+      await ThreadsTableTestHelper.addComment({ id: 'comment-123', userId });
+      const fakeIdGenerator = () => '123';
+      const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      await threadRepository.likeComment({ commentId: 'comment-123', userId });
+      await threadRepository.likeComment({ commentId: 'comment-123', userId });
+
+      // Assert
+      const comments = await ThreadsTableTestHelper.findCommentsById('comment-123');
+      expect(comments[0].liked_by).not.toContain(userId);
     });
   });
 });

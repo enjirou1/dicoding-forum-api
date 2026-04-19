@@ -19,7 +19,8 @@ describe('CommentUseCase', () => {
       threadId: 'thread-123',
       userId: 'user-123',
       createdAt: new Date('2025-01-01T00:00:00.000Z'),
-      updatedAt: new Date('2025-01-01T00:00:00.000Z')
+      updatedAt: new Date('2025-01-01T00:00:00.000Z'),
+      likedBy: []
     });
 
     const mockThread = new Thread({
@@ -50,7 +51,8 @@ describe('CommentUseCase', () => {
       threadId: useCasePayload.threadId,
       userId: useCasePayload.userId,
       createdAt: new Date('2025-01-01T00:00:00.000Z'),
-      updatedAt: new Date('2025-01-01T00:00:00.000Z')
+      updatedAt: new Date('2025-01-01T00:00:00.000Z'),
+      likedBy: []
     }));
     expect(mockThreadRepository.addComment).toBeCalledWith(new CreateComment(useCasePayload));
   });
@@ -68,7 +70,8 @@ describe('CommentUseCase', () => {
       threadId: 'thread-123',
       userId: 'user-123',
       createdAt: new Date('2025-01-01T00:00:00.000Z'),
-      updatedAt: new Date('2025-01-01T00:00:00.000Z')
+      updatedAt: new Date('2025-01-01T00:00:00.000Z'),
+      likedBy: []
     });
 
     const mockThreadRepository = new ThreadRepository();
@@ -86,5 +89,48 @@ describe('CommentUseCase', () => {
     // Assert
     expect(comment).toStrictEqual(useCasePayload.id);
     expect(mockThreadRepository.deleteComment).toBeCalledWith(useCasePayload.id);
+  });
+
+  it('should orchestrating the like comment action correctly', async () => {
+    // Arrange
+    const useCasePayload = {
+      id: 'comment-123',
+      userId: 'user-123'
+    };
+
+    const mockComment = new Comment({
+      id: 'comment-123',
+      content: 'This is content',
+      threadId: 'thread-123',
+      userId: 'user-123',
+      createdAt: new Date('2025-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2025-01-01T00:00:00.000Z'),
+      likedBy: ['user-123']
+    });
+
+    const mockThread = new Thread({
+      id: 'thread-123',
+      title: 'Title',
+      body: 'This is body',
+      userId: 'user-123',
+      createdAt: new Date('2025-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2025-01-01T00:00:00.000Z')
+    });
+
+    const mockThreadRepository = new ThreadRepository();
+
+    mockThreadRepository.likeComment = vi.fn().mockImplementation(() => Promise.resolve(useCasePayload));
+    mockThreadRepository.getCommentById = vi.fn().mockImplementation(() => Promise.resolve(mockComment));
+    mockThreadRepository.getThreadById = vi.fn().mockImplementation(() => Promise.resolve(mockThread));
+
+    const commentUseCase = new CommentUseCase({
+      threadRepository: mockThreadRepository,
+    });
+
+    // Action
+    await commentUseCase.like(useCasePayload);
+
+    // Assert
+    expect(mockThreadRepository.likeComment).toBeCalledWith(useCasePayload);
   });
 });

@@ -12,6 +12,7 @@ const createThreadsRouter = (handler) => {
   router.delete('/:threadId/comments/:commentId', [authenticationMiddleware.requireAuthentication], handler.deleteCommentHandler);
   router.post('/:threadId/comments/:commentId/replies', [authenticationMiddleware.requireAuthentication], handler.postReplyHandler);
   router.delete('/:threadId/comments/:commentId/replies/:replyId', [authenticationMiddleware.requireAuthentication], handler.deleteReplyHandler);
+  router.put('/:threadId/comments/:commentId/likes', [authenticationMiddleware.requireAuthentication], handler.likeCommentHandler);
 
   return router;
 };

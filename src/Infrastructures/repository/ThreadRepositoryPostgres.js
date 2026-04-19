@@ -43,7 +43,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const id = `comment-${this._idGenerator()}`;
 
     const query = {
-      text: 'INSERT INTO comments VALUES($1, $2, $3, $4, NOW(), NOW()) RETURNING id, thread_id AS "threadId", user_id AS "userId", content, created_at AS "createdAt", updated_at AS "updatedAt"',
+      text: 'INSERT INTO comments VALUES($1, $2, $3, $4, NOW(), NOW()) RETURNING id, thread_id AS "threadId", user_id AS "userId", content, created_at AS "createdAt", updated_at AS "updatedAt", liked_by AS "likedBy"',
       values: [id, threadId, userId, content],
     };
 
@@ -54,7 +54,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async getCommentsByThreadId(threadId) {
     const query = {
-      text: `SELECT c.id, c.thread_id AS "threadId", c.user_id AS "userId", c.content, c.created_at AS "createdAt", c.updated_at AS "updatedAt", u.username, c.deleted_at AS "deletedAt"
+      text: `SELECT c.id, c.thread_id AS "threadId", c.user_id AS "userId", c.content, c.created_at AS "createdAt", c.updated_at AS "updatedAt", u.username, c.deleted_at AS "deletedAt", c.liked_by AS "likedBy"
              FROM comments c
              JOIN users u ON c.user_id = u.id
              WHERE c.thread_id = $1
@@ -70,7 +70,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async getCommentById(id) {
     const query = {
-      text: `SELECT c.id, c.thread_id AS "threadId", c.user_id AS "userId", c.content, c.created_at AS "createdAt", c.updated_at AS "updatedAt", u.username
+      text: `SELECT c.id, c.thread_id AS "threadId", c.user_id AS "userId", c.content, c.created_at AS "createdAt", c.updated_at AS "updatedAt", u.username, c.deleted_at AS "deletedAt", c.liked_by AS "likedBy"
              FROM comments c
              JOIN users u ON c.user_id = u.id
              WHERE c.id = $1`,
@@ -140,6 +140,32 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const query = {
       text: 'UPDATE replies SET deleted_at = NOW() WHERE id = $1',
       values: [id],
+    };
+
+    await this._pool.query(query);
+  }
+
+  async likeComment({ commentId, userId }) {
+    const queryComment = {
+      text: `SELECT c.id, c.thread_id AS "threadId", c.user_id AS "userId", c.content, c.created_at AS "createdAt", c.updated_at AS "updatedAt", u.username, c.deleted_at AS "deletedAt", c.liked_by AS "likedBy"
+             FROM comments c
+             JOIN users u ON c.user_id = u.id
+             WHERE c.id = $1`,
+      values: [commentId],
+    };
+    const resultcomment = await this._pool.query(queryComment);
+    const comment = resultcomment.rows[0] && new Comment(resultcomment.rows[0]);
+    const likedBy = comment.likedBy || [];
+
+    if (likedBy.includes(userId)) {
+      likedBy.splice(likedBy.indexOf(userId), 1);
+    } else {
+      likedBy.push(userId);
+    }
+
+    const query = {
+      text: 'UPDATE comments SET liked_by = $1 WHERE id = $2',
+      values: [likedBy, commentId],
     };
 
     await this._pool.query(query);
