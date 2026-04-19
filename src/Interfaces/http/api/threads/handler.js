@@ -12,6 +12,7 @@ class ThreadsHandler {
     this.deleteCommentHandler = this.deleteCommentHandler.bind(this);
     this.postReplyHandler = this.postReplyHandler.bind(this);
     this.deleteReplyHandler = this.deleteReplyHandler.bind(this);
+    this.likeCommentHandler = this.likeCommentHandler.bind(this);
   }
 
   async postThreadHandler(req, res, next) {
@@ -58,6 +59,7 @@ class ThreadsHandler {
           username: comment.username,
           content: comment.deletedAt ? '**komentar telah dihapus**' : comment.content,
           date: comment.createdAt,
+          likeCount: comment.likedBy ? comment.likedBy.length : 0,
           replies: replies.filter((reply) => reply.commentId === comment.id).map((reply) => {
             return {
               id: reply.id,
@@ -137,6 +139,19 @@ class ThreadsHandler {
     try {
       const replyUseCase = this._container.getInstance(ReplyUseCase.name);
       await replyUseCase.delete({ id: req.params.replyId, userId: res.locals.user.id });
+
+      res.status(200).json({
+        status: 'success',
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async likeCommentHandler(req, res, next) {
+    try {
+      const commentUseCase = this._container.getInstance(CommentUseCase.name);
+      await commentUseCase.like({ threadId: req.params.threadId, commentId: req.params.commentId, userId: res.locals.user.id });
 
       res.status(200).json({
         status: 'success',

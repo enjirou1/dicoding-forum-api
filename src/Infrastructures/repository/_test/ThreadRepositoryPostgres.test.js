@@ -192,4 +192,43 @@ describe('ThreadRepositoryPostgres', () => {
       expect(replies).toHaveLength(0);
     });
   });
+
+  describe('likeComment function', () => {
+    it('should like comment correctly', async () => {
+      // Arrange
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
+      await ThreadsTableTestHelper.addComment({ id: 'comment-123', userId });
+      const fakeIdGenerator = () => '123';
+      const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      await threadRepository.likeComment({ commentId: 'comment-123', userId });
+
+      // Assert
+      const comments = await ThreadsTableTestHelper.findCommentsById('comment-123');
+      expect(comments[0].liked_by).toContain(userId);
+    });
+
+    it('should unlike comment correctly', async () => {
+      // Arrange
+      const userId = `user-${nanoid()}`;
+      const username = `dicoding-${Date.now()}-${Math.random()}`;
+      await UsersTableTestHelper.addUser({ id: userId, username });
+      await ThreadsTableTestHelper.addThread({ id: 'thread-123', userId });
+      await ThreadsTableTestHelper.addComment({ id: 'comment-123', userId });
+      const fakeIdGenerator = () => '123';
+      const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      await threadRepository.likeComment({ commentId: 'comment-123', userId });
+      await threadRepository.likeComment({ commentId: 'comment-123', userId });
+
+      // Assert
+      const comments = await ThreadsTableTestHelper.findCommentsById('comment-123');
+      expect(comments[0].liked_by).not.toContain(userId);
+    });
+  });
 });

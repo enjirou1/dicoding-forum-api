@@ -33,6 +33,20 @@ class CommentUseCase {
 
     return this._threadRepository.deleteComment(useCasePayload.id);
   }
+
+  async like(useCasePayload) {
+    const thread = await this._threadRepository.getThreadById(useCasePayload.threadId);
+    if (!thread) {
+      throw new Error('COMMENT_USE_CASE.THREAD_NOT_FOUND');
+    }
+
+    const comment = await this._threadRepository.getCommentById(useCasePayload.commentId);
+    if (!comment) {
+      throw new Error('COMMENT_USE_CASE.COMMENT_NOT_FOUND');
+    }
+
+    await this._threadRepository.likeComment(useCasePayload);
+  }
 }
 
 export default CommentUseCase;

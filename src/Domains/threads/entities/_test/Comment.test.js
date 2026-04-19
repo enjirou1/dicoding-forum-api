@@ -7,7 +7,7 @@ describe('a Comment entities', () => {
       id: 'Comment ID',
       content: 'Content',
       threadId: 'Thread ID',
-      userId: '123'
+      userId: '123',
     };
 
     // Action and Assert
@@ -22,7 +22,8 @@ describe('a Comment entities', () => {
       threadId: 'Thread ID',
       userId: 123,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      likedBy: []
     };
 
     // Action and Assert
@@ -37,7 +38,8 @@ describe('a Comment entities', () => {
       threadId: 'Thread ID',
       userId: '123',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      likedBy: []
     };
 
     // Action

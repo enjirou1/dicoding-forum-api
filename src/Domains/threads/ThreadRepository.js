@@ -46,6 +46,10 @@ class ThreadRepository {
   async deleteReplyComment(replyId) {
     throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
+
+  async likeComment({ commentId, userId }) {
+    throw new Error('THREAD_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+  }
 }
 
 export default ThreadRepository;
